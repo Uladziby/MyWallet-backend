@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { User } from 'generated/prisma/client';
-import { AuthDto } from 'src/auth/auth.dto';
 import { LogActiveDayDto } from 'src/log-active-day/log-active-day.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/prisma.service';
 import * as dayjs from 'dayjs';
+
+require('json-bigint-patch');
+const currentDay = dayjs().format('YYYY-MM-DD');
 
 @Injectable()
 export class LogActiveDayService {
   constructor(private prisma: PrismaService) {}
-  async createOrUpdate({ sessionCount }: LogActiveDayDto, userId: number) {
-    const currentDay = dayjs().format('YYYY-MM-DD');
 
-    const where = {
+  async createOrUpdate({ sessionCount }: LogActiveDayDto, userId: number) {
+    const whereBy = {
       userId: userId,
       createdAt: {
         gte: new Date(currentDay + 'T00:00:00'),
@@ -19,37 +19,41 @@ export class LogActiveDayService {
       },
     };
 
-    let log = await this.prisma.logActiveDay.findFirst({
-      where,
+    const log = await this.prisma.logActiveDay.findFirst({
+      where: whereBy,
     });
 
     if (!log) {
-      log = await this.prisma.logActiveDay.create({
+      return await this.prisma.logActiveDay.create({
         data: {
           userId,
           sessionCount,
         },
       });
     } else {
-      log = await this.prisma.logActiveDay.update({
-        where,
+      return this.prisma.logActiveDay.updateMany({
+        where: {
+          AND: [
+            { userId },
+            {
+              createdAt: {
+                gte: new Date(currentDay + 'T00:00:00'),
+              },
+            },
+            {
+              createdAt: {
+                lte: new Date(currentDay + 'T23:59:59'),
+              },
+            },
+          ],
+        },
         data: { sessionCount },
       });
     }
-
-    return log;
   }
 
   async getStatistics(userId) {
-    const log = await this.prisma.logActiveDay.groupBy({
-      by: ['createdAt'],
-      orderBy: {
-        createdAt: 'desc',
-      },
-      where: {
-        userId,
-      },
-    });
-    return log;
+    return this.prisma
+      .$queryRaw`SELECT TOCHAR(DATE_TRUNC("month", created_at) , 'Month')AS month, SUM(sessionCount) AS session_count FROM log_active_day WHERE user_id =${userId} GROUP BY month ORDER BY month DESC`;
   }
 }

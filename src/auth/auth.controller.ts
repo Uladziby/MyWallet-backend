@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Post,
   UsePipes,
@@ -12,6 +13,11 @@ import { AuthDto } from 'src/auth/auth.dto';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Get('users')
+  async getUsers() {
+    return this.authService.getUsers();
+  }
 
   @UsePipes(new ValidationPipe())
   @HttpCode(200)
