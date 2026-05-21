@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { LogActiveDayDto } from 'src/log-active-day/log-active-day.dto';
-import { PrismaService } from 'src/prisma.service';
+import { LogActiveDayDto } from './log-active-day.dto';
+import { PrismaService } from '../prisma.service';
 import * as dayjs from 'dayjs';
 
 require('json-bigint-patch');

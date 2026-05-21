@@ -1,6 +1,6 @@
 import { PrismaService } from '../prisma.service';
 import { Injectable } from '@nestjs/common';
-import { FlowOptionDto } from 'src/flow-options/flow-options.dto';
+import { FlowOptionDto } from './flow-options.dto';
 
 @Injectable()
 export class FlowOptionsService {

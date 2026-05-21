@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { LogActiveDayService } from './log-active-day.service';
-import { Auth } from 'src/auth/auth.decorator';
-import { CurrentUser } from 'src/auth/user.decorator';
+import { Auth } from '../auth/auth.decorator';
+import { CurrentUser } from '../auth/user.decorator';
 
 @Controller('log-active-day')
 export class LogActiveDayController {
